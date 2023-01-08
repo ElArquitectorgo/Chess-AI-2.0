@@ -12,7 +12,7 @@ namespace Chess_AI.Controller
 {
     public class GameController
     {
-        // Falta implementar activar los turnos, terminar lo del fen.
+        // No activo los turnos por comodidad de testeo.
         // Falta la clase Status.
         // Con fen3, si hago Pe5,Pg5 me deja comer al paso las dos con el negro, no debería
         // aunque sea una situación irreal. Parece que si muevo una blanca no afecta al HasJumped.
@@ -52,10 +52,6 @@ namespace Chess_AI.Controller
                 }
                 if (piece.X == r1 && piece.Y == c1)
                 {
-                    Point finalMove = new Point(r2, c2);
-
-                    //if (piece.GetValidMoves(board).Contains(finalMove))
-                    //{
                     piece.Move(r2, c2);
                     // Comprobamos si la pieza ha realizado una captura
                     GetCapture(piece, r1, c1, r2, c2);
@@ -86,7 +82,6 @@ namespace Chess_AI.Controller
                     if (piece is Pawn && piece.X == 0 || piece is Pawn && piece.X == 7) MakePromotion(piece);
                                                
                     history.Add(turn, MakeBoardCopy(board));
-                    //}
                 }
             }
         }
@@ -99,12 +94,10 @@ namespace Chess_AI.Controller
         public void SetBoard(String fen)
         {
             board = Models.Setup.ReadFenNotation(fen);
-            history = new Dictionary<int, Piece[]>
-            {
-                { turn, MakeBoardCopy(board) }
-            };
+            history.Clear();
             turn = 0;
             jumpTurn = 0;
+            history.Add(turn, MakeBoardCopy(board));       
         }
 
         public String[] GetFenList()
