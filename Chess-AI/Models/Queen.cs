@@ -33,161 +33,99 @@ namespace Chess_AI.Models
         /// </summary>
         /// <param name="board"></param>
         /// <returns></returns>
-        public override List<Point> GetPseudoValidMoves(Piece[] board)
+        public override List<Point> GetPseudoValidMoves(Piece[,] board)
         {
             List<Point> validMoves = new List<Point>();
 
-            for (int x = X + 1; x < 8; x++)
+            for (int i = X + 1; i < 8; i++)
             {
-                validMoves.Add(new Point(x, Y));
+                if (board[i, Y] != null)
+                {
+                    if (board[i, Y].Color != this.Color) validMoves.Add(new Point(i, Y));
+                    break;
+                }
+                validMoves.Add(new Point(i, Y));
             }
-            for (int x = X - 1; x >= 0; x--)
+            for (int i = X - 1; i >= 0; i--)
             {
-                validMoves.Add(new Point(x, Y));
+                if (board[i, Y] != null)
+                {
+                    if (board[i, Y].Color != this.Color) validMoves.Add(new Point(i, Y));
+                    break;
+                }
+                validMoves.Add(new Point(i, Y));
             }
-            for (int y = Y + 1; y < 8; y++)
+            for (int j = Y + 1; j < 8; j++)
             {
-                validMoves.Add(new Point(X, y));
+                if (board[X, j] != null)
+                {
+                    if (board[X, j].Color != this.Color) validMoves.Add(new Point(X, j));
+                    break;
+                }
+                validMoves.Add(new Point(X, j));
             }
-            for (int y = Y - 1; y >= 0; y--)
+            for (int j = Y - 1; j >= 0; j--)
             {
-                validMoves.Add(new Point(X, y));
-            }
-
-            int i = X + 1;
-            int j = Y + 1;
-            while (i < 8 && j < 8)
-            {
-                validMoves.Add(new Point(i, j));
-                i++; j++;
-            }
-
-            i = X - 1;
-            j = Y + 1;
-            while (i >= 0 && j < 8)
-            {
-                validMoves.Add(new Point(i, j));
-                i--; j++;
-            }
-
-            i = X + 1;
-            j = Y - 1;
-            while (i < 8 && j >= 0)
-            {
-                validMoves.Add(new Point(i, j));
-                i++; j--;
+                if (board[X, j] != null)
+                {
+                    if (board[X, j].Color != this.Color) validMoves.Add(new Point(X, j));
+                    break;
+                }
+                validMoves.Add(new Point(X, j));
             }
 
-            i = X - 1;
-            j = Y - 1;
-            while (i >= 0 && j >= 0)
+            // Abajo derecha
+            int x = X + 1;
+            int y = Y + 1;
+            while (x < 8 && y < 8 && board[x, y] == null)
             {
-                validMoves.Add(new Point(i, j));
-                i--; j--;
+                validMoves.Add(new Point(x, y));
+                x++; y++;
+            }
+            if (x < 8 && y < 8 && board[x, y] != null && board[x, y].Color != this.Color)
+            {
+                validMoves.Add(new Point(x, y));
+            }
+            // Arriba derecha
+            x = X - 1;
+            y = Y + 1;
+            while (x >= 0 && y < 8 && board[x, y] == null)
+            {
+                validMoves.Add(new Point(x, y));
+                x--; y++;
+            }
+            if (x >= 0 && y < 8 && board[x, y] != null && board[x, y].Color != this.Color)
+            {
+                validMoves.Add(new Point(x, y));
+            }
+            // Abajo izquierda
+            x = X + 1;
+            y = Y - 1;
+            while (x < 8 && y >= 0 && board[x, y] == null)
+            {
+                validMoves.Add(new Point(x, y));
+                x++; y--;
+            }
+            if (x < 8 && y >= 0 && board[x, y] != null && board[x, y].Color != this.Color)
+            {
+                validMoves.Add(new Point(x, y));
+            }
+            // Arriba izquierda
+            x = X - 1;
+            y = Y - 1;
+            while (x >= 0 && y >= 0 && board[x, y] == null)
+            {
+                validMoves.Add(new Point(x, y));
+                x--; y--;
+            }
+            if (x >= 0 && y >= 0 && board[x, y] != null && board[x, y].Color != this.Color)
+            {
+                validMoves.Add(new Point(x, y));
             }
 
-            return RemoveMovesBeyondPieces(validMoves, board);
-        }
-
-        /// <summary>
-        /// Elimina de los movimientos válidos aquellas casillas que impliquen saltar piezas
-        /// </summary>
-        /// <param name="validMoves"></param>
-        /// <param name="board"></param>
-        /// <returns></returns>
-        public List<Point> RemoveMovesBeyondPieces(List<Point> validMoves, Piece[] board)
-        {
-            foreach (Piece piece in board)
-            {
-                Point p = new Point(piece.X, piece.Y);
-                if (!validMoves.Contains(p) || !piece.IsAlive) continue;
-
-                // Si la pieza es del mismo color
-                if (piece.Color == this.Color)
-                {
-                    validMoves.Remove(p);
-                }
-
-                // Si la pieza está abajo derecha
-                int i = piece.X + 1;
-                int j = piece.Y + 1;
-                if (piece.X > this.X && piece.Y > this.Y)
-                {
-                    while (i < 8 && j < 8)
-                    {
-                        validMoves.Remove(new Point(i, j));
-                        i++; j++;
-                    }
-                }
-                // Si la pieza está arriba derecha
-                i = piece.X - 1;
-                j = piece.Y + 1;
-                if (piece.X < this.X && piece.Y > this.Y)
-                {
-                    while (i >= 0 && j < 8)
-                    {
-                        validMoves.Remove(new Point(i, j));
-                        i--; j++;
-                    }
-                }
-                // Si la pieza está abajo izquierda
-                i = piece.X + 1;
-                j = piece.Y - 1;
-                if (piece.X > this.X && piece.Y < this.Y)
-                {
-                    while (i < 8 && j >= 0)
-                    {
-                        validMoves.Remove(new Point(i, j));
-                        i++; j--;
-                    }
-                }
-                // Si la pieza está arriba izquierda
-                i = piece.X - 1;
-                j = piece.Y - 1;
-                if (piece.X < this.X && piece.Y < this.Y)
-                {
-                    while (i >= 0 && j >= 0)
-                    {
-                        validMoves.Remove(new Point(i, j));
-                        i--; j--;
-                    }
-                }
-
-                // Si la pieza está a la derecha
-                if (p.X == X && p.Y > Y)
-                {
-                    for (int y = p.Y + 1; y < 8; y++)
-                    {
-                        validMoves.Remove(new Point(X, y));
-                    }
-                }
-                // Si la pieza está a la izquierda
-                else if (p.X == X && p.Y < Y)
-                {
-                    for (int y = p.Y - 1; y >= 0; y--)
-                    {
-                        validMoves.Remove(new Point(X, y));
-                    }
-                }
-                // Si la pieza está por debajo
-                else if (p.Y == Y && p.X > X)
-                {
-                    for (int x = p.X + 1; x < 8; x++)
-                    {
-                        validMoves.Remove(new Point(x, Y));
-                    }
-                }
-                // Si la pieza está por encima
-                else if (p.Y == Y && p.X < X)
-                {
-                    for (int x = p.X - 1; x >= 0; x--)
-                    {
-                        validMoves.Remove(new Point(x, Y));
-                    }
-                }
-            }
             return validMoves;
         }
+
         public override Piece DeepClone()
         {
             Queen q = (Queen)this.MemberwiseClone();

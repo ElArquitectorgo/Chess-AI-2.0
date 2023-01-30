@@ -14,6 +14,7 @@ namespace Chess_AI.Models
         public override int Id { get { return id; } set { id = value; } }
         private Models.Color _color;
         public bool HasJumped { get; set; }
+        public int turnJumped = 0;
         public Pawn(int x, int y, Models.Color color) : base(x, y, color)
         {
             HasJumped = false;
@@ -34,52 +35,35 @@ namespace Chess_AI.Models
         /// </summary>
         /// <param name="board"></param>
         /// <returns></returns>
-        public override List<Point> GetPseudoValidMoves(Piece[] board)
+        public override List<Point> GetPseudoValidMoves(Piece[,] board)
         {
             List<Point> validMoves = new List<Point>();
 
             if (this.Color == Models.Color.White)
             {
-                if (X == 6) validMoves.Add(new Point(X - 2, Y));
-                validMoves.Add(new Point(X - 1, Y));
+                if (X - 1 >= 0 && board[X - 1, Y] == null)
+                {
+                    validMoves.Add(new Point(X - 1, Y));
+                    if (X == 6 && board[4, Y] == null) validMoves.Add(new Point(X - 2, Y));
+                }
+                // Diagonales
+                if (X - 1 >= 0 && Y - 1 >= 0 && board[X - 1, Y - 1] != null && board[X - 1, Y - 1].Color != this.Color)
+                    validMoves.Add(new Point(X - 1, Y - 1));
+                if (X - 1 >= 0 && Y + 1 < 8 && board[X - 1, Y + 1] != null && board[X - 1, Y + 1].Color != this.Color)
+                    validMoves.Add(new Point(X - 1, Y + 1));
             }
             else
             {
-                if (X == 1) validMoves.Add(new Point(X + 2, Y));
-                validMoves.Add(new Point(X + 1, Y));
-            }
-
-            foreach (Piece piece in board)
-            {
-                Point p = new Point(piece.X, piece.Y);
-                // Elimina la piezas que tenga en frente
-                if (validMoves.Contains(p) && piece.IsAlive)
+                if (X + 1 < 8 && board[X + 1, Y] == null)
                 {
-                    validMoves.Remove(p);
+                    validMoves.Add(new Point(X + 1, Y));
+                    if (X == 1 && board[3, Y] == null) validMoves.Add(new Point(X + 2, Y));
                 }
-                // Aprovecho el bucle para añadir las piezas que estén en diagonal
-                if (piece.X == X - 1 && piece.Y == Y - 1 && this.Color == Models.Color.White && this.Color != piece.Color ||
-                    piece.X == X - 1 && piece.Y == Y + 1 && this.Color == Models.Color.White && this.Color != piece.Color)
-                {
-                    validMoves.Add(p);
-                }
-                if (piece.X == X + 1 && piece.Y == Y - 1 && this.Color == Models.Color.Black && this.Color != piece.Color ||
-                    piece.X == X + 1 && piece.Y == Y + 1 && this.Color == Models.Color.Black && this.Color != piece.Color)
-                {
-                    validMoves.Add(p);
-                }
-                if (this.Color == Models.Color.White && this.X == 6 && piece.X == 5 && this.Y == piece.Y) validMoves.Remove(new Point(4, this.Y));
-                else if (this.Color == Models.Color.Black && this.X == 1 && piece.X == 2 && this.Y == piece.Y) validMoves.Remove(new Point(3, this.Y));
-            }
-
-            // Elimina las casillas fuera del tablero
-            List<Point> validMovesCopy = new List<Point>(validMoves);
-            foreach (Point p in validMovesCopy)
-            {
-                if (p.X < 0 || p.X > 7 || p.Y < 0 || p.Y > 7)
-                {
-                    validMoves.Remove(p);
-                }
+                // Diagonales
+                if (X + 1 < 8 && Y - 1 >= 0 && board[X + 1, Y - 1] != null && board[X + 1, Y - 1].Color != this.Color)
+                    validMoves.Add(new Point(X + 1, Y - 1));
+                if (X + 1 < 8 && Y + 1 < 8 && board[X + 1, Y + 1] != null && board[X + 1, Y + 1].Color != this.Color)
+                    validMoves.Add(new Point(X + 1, Y + 1));
             }
 
             if (this.Color == Models.Color.Black && this.X == 4 ||
@@ -88,23 +72,30 @@ namespace Chess_AI.Models
 
             return validMoves;
         }
-        public List<Point> GetEnPassantMoves(Piece[] board)
+        public List<Point> GetEnPassantMoves(Piece[,] board)
         {
             List<Point> EnPassantMoves = new List<Point>();
-            foreach (Piece piece in board)
+            if (Board.GetTurn() != Board.GetJumpTurn() + 1) return EnPassantMoves;
+
+            if (X + 1 < 8 && Y - 1 >= 0 && board[X, Y - 1] is Pawn && this.Color == Models.Color.Black && board[X, Y - 1].Color != this.Color)
             {
-                if (piece is Pawn && piece.Color == Models.Color.White && this.Color == Models.Color.Black)
-                {
-                    Pawn p = (Pawn)piece;
-                    if (p.HasJumped && p.X == this.X && p.Y == this.Y + 1) EnPassantMoves.Add(new Point(X + 1, Y + 1));
-                    if (p.HasJumped && p.X == this.X && p.Y == this.Y - 1) EnPassantMoves.Add(new Point(X + 1, Y - 1));
-                }
-                else if (piece is Pawn && piece.Color == Models.Color.Black && this.Color == Models.Color.White)
-                {
-                    Pawn p = (Pawn)piece;
-                    if (p.HasJumped && p.X == this.X && p.Y == this.Y + 1) EnPassantMoves.Add(new Point(X - 1, Y + 1));
-                    if (p.HasJumped && p.X == this.X && p.Y == this.Y - 1) EnPassantMoves.Add(new Point(X - 1, Y - 1));
-                }
+                Pawn p = (Pawn) board[X, Y - 1];
+                if (p.turnJumped == Board.GetJumpTurn()) EnPassantMoves.Add(new Point(X + 1, Y - 1));
+            }
+            if (X + 1 < 8 && Y + 1 < 8 && board[X, Y + 1] is Pawn && this.Color == Models.Color.Black && board[X, Y + 1].Color != this.Color)
+            {
+                Pawn p = (Pawn)board[X, Y + 1];
+                if (p.turnJumped == Board.GetTurn() - 1) EnPassantMoves.Add(new Point(X + 1, Y + 1));
+            }
+            if (X - 1 >= 0 && Y - 1 >= 0 && board[X, Y - 1] is Pawn && this.Color == Models.Color.White && board[X, Y - 1].Color != this.Color)
+            {
+                Pawn p = (Pawn)board[X, Y - 1];
+                if (p.turnJumped == Board.GetTurn() - 1) EnPassantMoves.Add(new Point(X - 1, Y - 1));
+            }
+            if (X - 1 >= 0 && Y + 1 < 8 && board[X, Y + 1] is Pawn && this.Color == Models.Color.White && board[X, Y + 1].Color != this.Color)
+            {
+                Pawn p = (Pawn)board[X, Y + 1];
+                if (p.turnJumped == Board.GetTurn() - 1) EnPassantMoves.Add(new Point(X - 1, Y + 1));
             }
 
             return EnPassantMoves;

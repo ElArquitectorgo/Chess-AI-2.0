@@ -33,39 +33,27 @@ namespace Chess_AI.Models
         /// </summary>
         /// <param name="board"></param>
         /// <returns></returns>
-        public override List<Point> GetPseudoValidMoves(Piece[] board)
+        public override List<Point> GetPseudoValidMoves(Piece[,] board)
         {
-            List<Point> validMoves = new List<Point>
-            {
-                new Point(X - 1, Y - 2),
-                new Point(X - 2, Y - 1),
-                new Point(X + 1, Y - 2),
-                new Point(X + 2, Y - 1),
-                new Point(X - 1, Y + 2),
-                new Point(X - 2, Y + 1),
-                new Point(X + 1, Y + 2),
-                new Point(X + 2, Y + 1)
-            };
+            List<Point> validMoves = new List<Point>();
 
-            // Elimina las piezas aliadas
-            foreach (Piece piece in board)
-            {
-                Point p = new Point(piece.X, piece.Y);
-                if (validMoves.Contains(p) && piece.Color == this.Color && piece.IsAlive)
-                {
-                    validMoves.Remove(p);
-                }
-            }
+            if (X - 1 >= 0 && Y - 2 >= 0 && board[X - 1, Y - 2] == null || X - 1 >= 0 && Y - 2 >= 0 && board[X - 1, Y - 2].Color != this.Color)
+                validMoves.Add(new Point(X - 1, Y - 2));
+            if (X - 2 >= 0 && Y - 1 >= 0 && board[X - 2, Y - 1] == null || X - 2 >= 0 && Y - 1 >= 0 && board[X - 2, Y - 1].Color != this.Color)
+                validMoves.Add(new Point(X - 2, Y - 1));
+            if (X + 1 < 8 && Y - 2 >= 0 && board[X + 1, Y - 2] == null || X + 1 < 8 && Y - 2 >= 0 && board[X + 1, Y - 2].Color != this.Color)
+                validMoves.Add(new Point(X + 1, Y - 2));
+            if (X + 2 < 8 && Y - 1 >= 0 && board[X + 2, Y - 1] == null || X + 2 < 8 && Y - 1 >= 0 && board[X + 2, Y - 1].Color != this.Color)
+                validMoves.Add(new Point(X + 2, Y - 1));
+            if (X - 1 >= 0 && Y + 2 < 8 && board[X - 1, Y + 2] == null || X - 1 >= 0 && Y + 2 < 8 && board[X - 1, Y + 2].Color != this.Color)
+                validMoves.Add(new Point(X - 1, Y + 2));
+            if (X - 2 >= 0 && Y + 1 < 8 && board[X - 2, Y + 1] == null || X - 2 >= 0 && Y + 1 < 8 && board[X - 2, Y + 1].Color != this.Color)
+                validMoves.Add(new Point(X - 2, Y + 1));
+            if (X + 1 < 8 && Y + 2 < 8 && board[X + 1, Y + 2] == null || X + 1 < 8 && Y + 2 < 8 && board[X + 1, Y + 2].Color != this.Color)
+                validMoves.Add(new Point(X + 1, Y + 2));
+            if (X + 2 < 8 && Y + 1 < 8 && board[X + 2, Y + 1] == null || X + 2 < 8 && Y + 1 < 8 && board[X + 2, Y + 1].Color != this.Color)
+                validMoves.Add(new Point(X + 2, Y + 1));
 
-            // Elimina las casillas fuera del tablero
-            List<Point> validMovesCopy = new List<Point>(validMoves);
-            foreach (Point p in validMovesCopy)
-            {
-                if (p.X < 0 || p.X > 7 || p.Y < 0 || p.Y > 7)
-                {
-                    validMoves.Remove(p);
-                }
-            }
             return validMoves;
         }
         public override Piece DeepClone()

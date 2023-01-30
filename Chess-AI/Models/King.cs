@@ -35,39 +35,26 @@ namespace Chess_AI.Models
         /// </summary>
         /// <param name="board"></param>
         /// <returns></returns>
-        public override List<Point> GetPseudoValidMoves(Piece[] board)
+        public override List<Point> GetPseudoValidMoves(Piece[,] board)
         {
-            List<Point> validMoves = new List<Point>
-            {
-                new Point(X, Y + 1),
-                new Point(X, Y - 1),
-                new Point(X + 1, Y),
-                new Point(X - 1, Y),
-                new Point(X + 1, Y + 1),
-                new Point(X + 1, Y - 1),
-                new Point(X - 1, Y + 1),
-                new Point(X - 1, Y - 1)
-            };
+            List<Point> validMoves = new List<Point>();
 
-            // Elimina las piezas aliadas
-            foreach (Piece piece in board)
-            {
-                Point p = new Point(piece.X, piece.Y);
-                if (validMoves.Contains(p) && piece.Color == this.Color && piece.IsAlive)
-                {
-                    validMoves.Remove(p);
-                }
-            }
-
-            // Elimina las casillas fuera del tablero
-            List<Point> validMovesCopy = new List<Point>(validMoves);
-            foreach (Point p in validMovesCopy)
-            {
-                if (p.X < 0 || p.X > 7 || p.Y < 0 || p.Y > 7)
-                {
-                    validMoves.Remove(p);
-                }
-            }
+            if (Y + 1 < 8 && board[X, Y + 1] == null || Y + 1 < 8 && board[X, Y + 1].Color != this.Color)
+                validMoves.Add(new Point(X, Y + 1));
+            if (Y - 1 >= 0 && board[X, Y - 1] == null || Y - 1 >= 0 && board[X, Y - 1].Color != this.Color)
+                validMoves.Add(new Point(X, Y - 1));
+            if (X + 1 < 8 && board[X + 1, Y] == null || X + 1 < 8 && board[X + 1, Y].Color != this.Color)
+                validMoves.Add(new Point(X + 1, Y));
+            if (X - 1 >= 0 && board[X - 1, Y] == null || X - 1 >= 0 && board[X - 1, Y].Color != this.Color)
+                validMoves.Add(new Point(X - 1, Y));
+            if (X + 1 < 8 && Y + 1 < 8 && board[X + 1, Y + 1] == null || X + 1 < 8 && Y + 1 < 8 && board[X + 1, Y + 1].Color != this.Color)
+                validMoves.Add(new Point(X + 1, Y + 1));
+            if (X + 1 < 8 && Y - 1 >= 0 && board[X + 1, Y - 1] == null || X + 1 < 8 && Y - 1 >= 0 && board[X + 1, Y - 1].Color != this.Color)
+                validMoves.Add(new Point(X + 1, Y - 1));
+            if (X - 1 >= 0 && Y + 1 < 8 && board[X - 1, Y + 1] == null || X - 1 >= 0 && Y + 1 < 8 && board[X - 1, Y + 1].Color != this.Color)
+                validMoves.Add(new Point(X - 1, Y + 1));
+            if (X - 1 >= 0 && Y - 1 >= 0 && board[X - 1, Y - 1] == null || X - 1 >= 0 && Y - 1 >= 0 && board[X - 1, Y - 1].Color != this.Color)
+                validMoves.Add(new Point(X - 1, Y - 1));
 
             if (CanCastle)
             {
@@ -76,59 +63,29 @@ namespace Chess_AI.Models
 
             return validMoves;
         }
-        private List<Point> GetCastleMoves(Piece[] board)
+        private List<Point> GetCastleMoves(Piece[,] board)
         {
             List<Point> CastleMoves = new List<Point>();
 
-            bool wLeftCastling = false;
-            bool wRightCastling = false;
-            bool bLeftCastling = false;
-            bool bRightCastling = false;
+            bool wLeftCastling = true;
+            bool wRightCastling = true;
+            bool bLeftCastling = true;
+            bool bRightCastling = true;
 
-            bool wLeftBlocked = false;
-            bool wRightBlocked = false;
-            bool bLeftBlocked = false;
-            bool bRightBlocked = false;
+            bool wLeftBlocked = true;
+            bool wRightBlocked = true;
+            bool bLeftBlocked = true;
+            bool bRightBlocked = true;
 
-            foreach (Piece piece in board)
-            {
-                // Enroque blancas
-                if (piece.X == 7 && piece is not King && this.Color == Models.Color.White)
-                {
-                    // Enroque largo blanco
-                    if (piece.Y == 1 || piece.Y == 2 || piece.Y == 3) wLeftBlocked = true;
-                    else if (piece.Y == 0 && piece is Rook && piece.Color == this.Color)
-                    {
-                        Rook p = (Rook)piece;
-                        if (!p.HasMoved) wLeftCastling = true;
-                    }
-                    // Enroque corto
-                    if (piece.Y == 5 || piece.Y == 6) wRightBlocked = true;
-                    else if (piece.Y == 7 && piece is Rook && piece.Color == this.Color)
-                    {
-                        Rook p = (Rook)piece;
-                        if (!p.HasMoved) wRightCastling = true;
-                    }
-                }
-                // Enroque negras
-                else if (piece.X == 0 && piece is not King && this.Color == Models.Color.Black)
-                {
-                    // Enroque largo blanco
-                    if (piece.Y == 1 || piece.Y == 2 || piece.Y == 3) bLeftBlocked = true;
-                    else if (piece.Y == 0 && piece is Rook && piece.Color == this.Color)
-                    {
-                        Rook p = (Rook)piece;
-                        if (!p.HasMoved) bLeftCastling = true;
-                    }
-                    // Enroque corto
-                    if (piece.Y == 5 || piece.Y == 6) bRightBlocked = true;
-                    else if (piece.Y == 7 && piece is Rook && piece.Color == this.Color)
-                    {
-                        Rook p = (Rook)piece;
-                        if (!p.HasMoved) bRightCastling = true;
-                    }
-                }
-            }
+            if (board[7, 0] is Rook && board[7, 0].Color == Models.Color.White && board[7, 1] == null && board[7, 2] == null && board[7, 3] == null)
+                wLeftBlocked = false;
+            if (board[7, 7] is Rook && board[7, 7].Color == Models.Color.White && board[7, 5] == null && board[7, 6] == null)
+                wRightBlocked = false;
+
+            if (board[0, 0] is Rook && board[0, 0].Color == Models.Color.Black && board[0, 1] == null && board[0, 2] == null && board[0, 3] == null)
+                bLeftBlocked = false;
+            if (board[0, 7] is Rook && board[0, 7].Color == Models.Color.Black && board[0, 5] == null && board[0, 6] == null)
+                bRightBlocked = false;
 
             // Comprobamos que no se amenaza ninguna casilla del enroque
             // Importante que la pieza no sea un rey pues si no saltaría un StackOverflow
@@ -137,14 +94,12 @@ namespace Chess_AI.Models
 
             foreach (Piece piece in board)
             {
+                if (piece == null || piece.Color == this.Color) continue;
 
                 if (this.Color == Models.Color.White && piece.Color == Models.Color.Black && piece is not King)
                 {
                     List<Point> enemyMoves = piece.GetPseudoValidMoves(board);
-                    if (enemyMoves.Contains(new Point(7, 2)) || enemyMoves.Contains(new Point(7, 3)))
-                    {
-                        wLeftCastling = false;
-                    }
+                    if (enemyMoves.Contains(new Point(7, 2)) || enemyMoves.Contains(new Point(7, 3))) wLeftCastling = false;
                     if (enemyMoves.Contains(new Point(7, 5)) || enemyMoves.Contains(new Point(7, 6))) wRightCastling = false;
                 }
                 else if (this.Color == Models.Color.Black && piece.Color == Models.Color.White && piece is not King)
@@ -156,10 +111,30 @@ namespace Chess_AI.Models
 
             }
 
-            if (wLeftCastling && !wLeftBlocked) CastleMoves.Add(new Point(7, 2));
-            if (wRightCastling && !wRightBlocked) CastleMoves.Add(new Point(7, 6));
-            if (bLeftCastling && !bLeftBlocked) CastleMoves.Add(new Point(0, 2));
-            if (bRightCastling && !bRightBlocked) CastleMoves.Add(new Point(0, 6));
+            if (wLeftCastling && !wLeftBlocked)
+            {
+                Rook r = (Rook)board[7, 0];
+                if (!r.HasMoved)
+                    CastleMoves.Add(new Point(7, 2));
+            }
+            if (wRightCastling && !wRightBlocked)
+            {
+                Rook r = (Rook)board[7, 7];
+                if (!r.HasMoved)
+                    CastleMoves.Add(new Point(7, 6));
+            }
+            if (bLeftCastling && !bLeftBlocked)
+            {
+                Rook r = (Rook)board[0, 0];
+                if (!r.HasMoved)
+                    CastleMoves.Add(new Point(0, 2));
+            }
+            if (bRightCastling && !bRightBlocked)
+            {
+                Rook r = (Rook)board[0, 7];
+                if (!r.HasMoved)
+                    CastleMoves.Add(new Point(0, 6));
+            }
 
             return CastleMoves;
         }

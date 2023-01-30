@@ -14,9 +14,16 @@ namespace Chess_AI.Controller
     {
         // No activo los turnos por comodidad de testeo.
         // Falta la clase Status.
-        // Con fen3, si hago Pe5,Pg5 me deja comer al paso las dos con el negro, no debería
-        // aunque sea una situación irreal. Parece que si muevo una blanca no afecta al HasJumped.
-        // El mayor problema es no tener acceso a las posiciones del tablero.
+        // No puedo explorar más profundo por lo que crece la búsqueda.
+
+        // Position 1, depth 6 = 119,060,324 -> 119,055,076 / 4e-5 % pérdidas
+        // Position 2, depth 3 = 97,862 -> (con depth 4 no me sirve tampoco) 97,862
+
+        // Position 3, depth 6 = 11,030,083 -> 11,024,419 / 5e-4 % pérdidas
+        // Position 3, depth 7 = 178,633,661 -> 178,447,267 / 1e-4 % pérdidas (las de la coronación seguro)
+
+        // Position 4, 5 no me sirven porque se prueban las promociones con caballo, torre y alfil.
+        // Position 6, depth 5 = 164,075,551 -> 164,075,551
 
         private static readonly string[] fen =
         {
@@ -37,61 +44,8 @@ namespace Chess_AI.Controller
         {
             history.Add(turn, MakeBoardCopy(board));
         }
-        public void Move(int r1, int c1, int r2, int c2)
-        {
-            foreach (Piece piece in board)
-            {
-                // Solo puede comerse al paso justo después de haber saltado, no en otro turno
-                if (piece is Pawn && turn != jumpTurn + 1)
-                {
-                    Pawn pawn= (Pawn)piece;
-                    if (pawn.HasJumped)
-                    {
-                        pawn.HasJumped = false;
-                    }
-                }
-                if (piece.X == r1 && piece.Y == c1)
-                {
-                    piece.Move(r2, c2);
-                    // Comprobamos si la pieza ha realizado una captura
-                    GetCapture(piece, r1, c1, r2, c2);
-                    turn++;
 
-                    // Si el rey o la torre se mueven, el rey pierde el derecho a enrocarse
-                    if (piece is King)
-                    {
-                        King p = (King) piece;
-                        p.CanCastle = false;
-                        // Comprobamos si el rey se ha enrocado
-                        if (c1 == 4 && c2 == 2 || c1 == 4 && c2 == 6) MakeCastle(r1, c2);
-                    }
-                    else if (piece is Rook)
-                    {
-                        Rook p = (Rook) piece;
-                        p.HasMoved = true;
-                    }
-                    // Si el peón realiza un salto inicial lo registramos para poder comer al paso
-                    if (piece is Pawn && piece.Color == Models.Color.White && r1 == 6 && r2 == 4 ||
-                        piece is Pawn && piece.Color == Models.Color.Black && r1 == 1 && r2 == 3)
-                    {
-                        Pawn p = (Pawn) piece;
-                        p.HasJumped = true;
-                        jumpTurn = turn - 1;
-                    }
-                    // Comprobamos si un peón ha coronado
-                    if (piece is Pawn && piece.X == 0 || piece is Pawn && piece.X == 7) MakePromotion(piece);
-                                               
-                    history.Add(turn, MakeBoardCopy(board));
-                }
-            }
-        }
-
-        public Piece[] GetBoard()
-        {
-            return board;
-        }
-
-        public void SetBoard(String fen)
+        public void SetBoardFromFen(String fen)
         {
             board = Models.Setup.ReadFenNotation(fen);
             history.Clear();
@@ -103,48 +57,6 @@ namespace Chess_AI.Controller
         public String[] GetFenList()
         {
             return fen;
-        }
-        private void MakeCastle(int r1, int c2)
-        {
-            foreach (Piece piece in board) 
-            {
-                if (piece is not Rook) continue;
-                if (r1 == 0 && c2 == 2 && piece.X == 0 && piece.Y == 0) { piece.Move(0, 3); return; }
-                else if (r1 == 0 && c2 == 6 && piece.X == 0 && piece.Y == 7) { piece.Move(0, 5); return; }
-                else if (r1 == 7 && c2 == 2 && piece.X == 7 && piece.Y == 0) { piece.Move(7, 3); return; }
-                else if (r1 == 7 && c2 == 6 && piece.X == 7 && piece.Y == 7) { piece.Move(7, 5); return; }
-            }
-        }
-
-        private void MakePromotion(Piece piece)
-        {
-            Queen queen = new Queen(piece.X, piece.Y, piece.Color);
-
-            for (int i = 0; i < board.Length; i++)
-            {
-                if (board[i] == piece)
-                {
-                    board[i] = queen;
-                    piece.IsAlive = false;
-                    return;
-                }
-            }
-        }
-
-        private void GetCapture(Piece piece, int r1, int c1, int r, int c)
-        {
-            foreach (Piece p in board)
-            {
-                if (p != piece && p.X == r && p.Y == c ||
-                    piece is Pawn && piece.Color == Models.Color.Black && p.Color != piece.Color && piece.X == p.X + 1 && piece.Y == p.Y && c1 != c && piece.X == 5 ||
-                    piece is Pawn && piece.Color == Models.Color.White && p.Color != piece.Color && piece.X == p.X - 1 && piece.Y == p.Y && c1 != c && piece.X == 2)
-                {
-                    p.IsAlive = false;
-                    p.X = -1;
-                    p.Y = -1;
-                    return;
-                }
-            }
         }
 
         public void UnmakeMove()

@@ -43,14 +43,15 @@ namespace Chess_AI
         private readonly UIElement[,] movementIndicators = new UIElement[8, 8];
 
         private readonly GameController gameController = new GameController();
-        private List<System.Drawing.Point> moves;
+        private List<System.Drawing.Point> moves = new List<System.Drawing.Point>();
         private Point pointA = new Point(-1, -1);
+        private Board board = new Board();
         public MainWindow()
         {
             InitializeComponent();
             SetupGameGrid();
             SetupListView();
-            DrawBlock();
+            Draw();
         }
 
         /// <summary>
@@ -108,7 +109,7 @@ namespace Chess_AI
         }
         private void ShowMovementIndicators(Piece piece)
         {
-            moves = piece.GetValidMoves(gameController.GetBoard());
+            moves = piece.GetValidMoves(board.GetBoard());
             foreach (System.Drawing.Point p in moves)
             {
                 movementIndicators[p.X, p.Y].Visibility = Visibility.Visible;
@@ -122,11 +123,11 @@ namespace Chess_AI
             }
         }
 
-        private void DrawBlock()
+        private void Draw()
         {
-            foreach (Piece piece in gameController.GetBoard())
+            foreach (Piece piece in board.GetBoard())
             {
-                if (!piece.IsAlive) continue;
+                if (piece == null || !piece.IsAlive) continue;
                 imageControls[piece.X, piece.Y].Opacity = 1;
                 imageControls[piece.X, piece.Y].Source = pieceImages[piece.Id];         
             }
@@ -143,21 +144,27 @@ namespace Chess_AI
             if (pointA.X == -1 && imageControls[row, col].Source != null)
             {
                 pointA = new Point(row, col);
-                foreach (Piece piece in gameController.GetBoard())
+                /*foreach (Piece piece in gameController.GetBoard())
                 {
                     if (piece.X == row && piece.Y == col)
                     {
                         ShowMovementIndicators(piece);
                     }
-                }
+                }*/
+                Piece piece = board.GetPiece(row, col);
+                if (piece != null) ShowMovementIndicators(piece);
+                else pointA = new Point(-1, -1);
             }
             else
             {
                 if (moves.Contains(new System.Drawing.Point(row, col)))
-                    gameController.Move((int)pointA.X, (int)pointA.Y, row, col);
+                {
+                    //gameController.Move((int)pointA.X, (int)pointA.Y, row, col);
+                    board.Move((int)pointA.X, (int)pointA.Y, row, col);
+                }
 
                 ResetImages();
-                DrawBlock();
+                Draw();
                 pointA = new Point(-1, -1);
             }
         }
@@ -168,27 +175,27 @@ namespace Chess_AI
             {
                 gameController.UnmakeMove();
                 ResetImages();
-                DrawBlock();
+                Draw();
             }
         }
 
         private void FenList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            gameController.SetBoard(FenList.SelectedItem.ToString());
+            board = new Board(FenList.SelectedItem.ToString());
             ResetImages();
-            DrawBlock();
+            Draw();
         }
 
         private void AnalyzeButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                BruteForce bf = new BruteForce(gameController);
-                int c = bf.Analyze(Convert.ToInt32(DepthTextBox.Text));
+                BruteForce bf = new BruteForce(board);
+                int c = bf.Analyze3(Convert.ToInt32(DepthTextBox.Text));
                 MessageBox.Show(c.ToString() + " possible moves with depth = " + DepthTextBox.Text);
 
                 // A modo de reset para que el diccionario se vacíe
-                gameController.SetBoard(FenList.SelectedItem.ToString());
+                board = new Board(FenList.SelectedItem.ToString());
             }
             catch (Exception ex) 
             {
