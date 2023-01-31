@@ -63,7 +63,7 @@
             <ListView x:Name="FenList" 
                       Height="Auto" 
                       Width="100"
-                      Canvas.Left="950" 
+                      Canvas.Left="930" 
                       Canvas.Top="100" HorizontalAlignment="Left" VerticalAlignment="Top"
                       SelectionChanged="FenList_SelectionChanged" RenderTransformOrigin="0.5,0.5" FontSize="14" FontWeight="Bold">
                 <ListView.View>
@@ -72,11 +72,23 @@
                     </GridView>
                 </ListView.View>
             </ListView>
-            <Button x:Name="Analyze_Button" Content="Analyze" Canvas.Left="950" Canvas.Top="500" Click="AnalyzeButton_Click" Height="50
+            <Button x:Name="Analyze_Button" Content="Analyze" Canvas.Left="930" Canvas.Top="850" Click="AnalyzeButton_Click" Height="50
                     " Width="100"
                     FontSize="20"/>
-            <TextBox x:Name="DepthTextBox" Canvas.Left="950" TextWrapping="Wrap" Canvas.Top="400" Width="36" FontSize="14" Height="20.62" Text="1"/>
-            <Label Content="Depth" Canvas.Left="950" Canvas.Top="375" HorizontalAlignment="Left" Padding="0,5,5,5" FontSize="14" FontWeight="Bold"/>
+            <TextBox x:Name="DepthTextBox" Canvas.Left="930" TextWrapping="Wrap" Canvas.Top="400" Width="36" FontSize="14" Height="20.62" Text="1"/>
+            <Label Content="Depth" Canvas.Left="930" Canvas.Top="375" HorizontalAlignment="Left" Padding="0,5,5,5" FontSize="14" FontWeight="Bold"/>
+            <ListView x:Name="AlgorithmList" 
+                      Height="Auto" 
+                      Width="Auto"
+                      Canvas.Left="930" 
+                      Canvas.Top="500" HorizontalAlignment="Center" VerticalAlignment="Center"
+                      SelectionChanged="AlgorithmList_SelectionChanged" RenderTransformOrigin="0.5,0.5" FontSize="14" FontWeight="Bold">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Algorithms"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
         </Canvas>
     </Viewbox>
 

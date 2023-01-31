@@ -22,7 +22,7 @@ namespace Chess_AI.Controller
         // Position 3, depth 6 = 11,030,083 -> 11,024,419 / 5e-4 % pérdidas
         // Position 3, depth 7 = 178,633,661 -> 178,447,267 / 1e-4 % pérdidas (las de la coronación seguro)
 
-        // Position 4, 5 no me sirven porque se prueban las promociones con caballo, torre y alfil.
+        // Position 4, 5 no me sirven porque hay promociones con caballo, torre y alfil.
         // Position 6, depth 5 = 164,075,551 -> 164,075,551
 
         private static readonly string[] fen =
@@ -33,6 +33,13 @@ namespace Chess_AI.Controller
             "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
             "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
             "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+        };
+
+        private static readonly string[] algorithms =
+        {
+            "Brute Force",
+            "MiniMax",
+            "Alpha-Beta Pruning"
         };
 
         private Piece[] board = Models.Setup.ReadFenNotation(fen[0]);
@@ -57,6 +64,11 @@ namespace Chess_AI.Controller
         public String[] GetFenList()
         {
             return fen;
+        }
+
+        public String[] GetAlgorithmsList()
+        {
+            return algorithms;
         }
 
         public void UnmakeMove()

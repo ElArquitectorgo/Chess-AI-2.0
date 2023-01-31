@@ -46,6 +46,7 @@ namespace Chess_AI
         private List<System.Drawing.Point> moves = new List<System.Drawing.Point>();
         private Point pointA = new Point(-1, -1);
         private Board board = new Board();
+        private IAlgorithm algorithm;
         public MainWindow()
         {
             InitializeComponent();
@@ -88,6 +89,8 @@ namespace Chess_AI
         {
             FenList.ItemsSource = gameController.GetFenList();
             FenList.SelectedIndex = 0;
+            AlgorithmList.ItemsSource = gameController.GetAlgorithmsList();
+            AlgorithmList.SelectedIndex = 0;
         }
 
         private void ResetImages()
@@ -144,13 +147,6 @@ namespace Chess_AI
             if (pointA.X == -1 && imageControls[row, col].Source != null)
             {
                 pointA = new Point(row, col);
-                /*foreach (Piece piece in gameController.GetBoard())
-                {
-                    if (piece.X == row && piece.Y == col)
-                    {
-                        ShowMovementIndicators(piece);
-                    }
-                }*/
                 Piece piece = board.GetPiece(row, col);
                 if (piece != null) ShowMovementIndicators(piece);
                 else pointA = new Point(-1, -1);
@@ -159,7 +155,6 @@ namespace Chess_AI
             {
                 if (moves.Contains(new System.Drawing.Point(row, col)))
                 {
-                    //gameController.Move((int)pointA.X, (int)pointA.Y, row, col);
                     board.Move((int)pointA.X, (int)pointA.Y, row, col);
                 }
 
@@ -186,13 +181,27 @@ namespace Chess_AI
             Draw();
         }
 
+        private void AlgorithmList_SelectionChanged(Object sender, SelectionChangedEventArgs e)
+        {
+            
+            
+        }
+
         private void AnalyzeButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                BruteForce bf = new BruteForce(board);
-                int c = bf.Analyze3(Convert.ToInt32(DepthTextBox.Text));
-                MessageBox.Show(c.ToString() + " possible moves with depth = " + DepthTextBox.Text);
+                if (AlgorithmList.SelectedItem.ToString() == "Brute Force")
+                {
+                    algorithm = new BruteForce(new Board(FenList.SelectedItem.ToString()));
+                }
+                else if (AlgorithmList.SelectedItem.ToString() == "MiniMax")
+                {
+                    algorithm = new MiniMax(new Board(FenList.SelectedItem.ToString()));
+                }
+
+                int c = algorithm.Analyze(Convert.ToInt32(DepthTextBox.Text));
+                MessageBox.Show(c.ToString() + " moves found with depth = " + DepthTextBox.Text);
 
                 // A modo de reset para que el diccionario se vacíe
                 board = new Board(FenList.SelectedItem.ToString());

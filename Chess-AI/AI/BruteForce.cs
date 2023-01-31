@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Chess_AI.AI
 {
-    public class BruteForce
+    public class BruteForce: IAlgorithm
     {
         private Board board;
         private Models.Color Color = Models.Color.White;
@@ -20,7 +20,7 @@ namespace Chess_AI.AI
 
         // 17 fen1 depth 5
         // 16 fen6 depth 4
-        public int Analyze3(int depth)
+        public int Analyze(int depth)
         {
             if (depth == 0) return 1;
 
@@ -78,7 +78,7 @@ namespace Chess_AI.AI
                     board.Move(initPosX, initPosY, p.X, p.Y);
                     ChangeColor();
 
-                    numPositions += Analyze3(depth - 1);
+                    numPositions += Analyze(depth - 1);
 
                     piece.Move(initPosX, initPosY);
                     board.SetJumpTurn(BoardJumpTurn);

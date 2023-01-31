@@ -24,6 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.13.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Assets\bBishop.png" />
     <Resource Include="Assets\bKing.png" />
     <Resource Include="Assets\bKnight.png" />
