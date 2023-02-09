@@ -72,7 +72,7 @@
                     </GridView>
                 </ListView.View>
             </ListView>
-            <Button x:Name="Analyze_Button" Content="Analyze" Canvas.Left="930" Canvas.Top="850" Click="AnalyzeButton_Click" Height="50
+            <Button x:Name="Analyze_Button" Content="Analyze" Canvas.Left="930" Canvas.Top="750" Click="AnalyzeButton_Click" Height="50
                     " Width="100"
                     FontSize="20"/>
             <TextBox x:Name="DepthTextBox" Canvas.Left="930" TextWrapping="Wrap" Canvas.Top="400" Width="36" FontSize="14" Height="20.62" Text="1"/>
@@ -89,6 +89,10 @@
                     </GridView>
                 </ListView.View>
             </ListView>
+
+            <Label x:Name="numMovesLabel" Content="Moves:" Canvas.Left="930" Canvas.Top="820" HorizontalAlignment="Left" Padding="0,5,5,5" FontSize="14" FontWeight="Bold"/>
+
+            <Label x:Name="bestMoveLabel" Content="Best move:" Canvas.Left="930" Canvas.Top="860" HorizontalAlignment="Left" Padding="0,5,5,5" FontSize="14" FontWeight="Bold"/>
         </Canvas>
     </Viewbox>
 

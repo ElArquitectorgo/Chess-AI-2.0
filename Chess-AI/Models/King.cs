@@ -15,9 +15,9 @@ namespace Chess_AI.Models
         private Models.Color _color;
         public bool CanCastle { get; set; }
 
-        public King(int x, int y, Models.Color color) : base(x, y, color)
+        public King(int x, int y, Models.Color color, bool canCastle = true) : base(x, y, color)
         {
-            CanCastle = true;
+            this.CanCastle = canCastle;
         }
 
         public override Color Color

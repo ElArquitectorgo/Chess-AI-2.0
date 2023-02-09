@@ -113,6 +113,17 @@ namespace Chess_AI
         private void ShowMovementIndicators(Piece piece)
         {
             moves = piece.GetValidMoves(board.GetBoard());
+            if (piece is Pawn && piece.Color == Models.Color.Black && piece.X == 4 ||
+                    piece is Pawn && piece.Color == Models.Color.White && piece.X == 3)
+            {
+                Pawn p = (Pawn)piece;
+                if (board.turn == board.jumpTurn + 1)
+                {
+                    moves.AddRange(p.GetEnPassantMoves(board.GetBoard(), board.turn, board.jumpTurn));
+                    moves = piece.FilterMoves(board.GetBoard(), moves);
+                }
+            }
+
             foreach (System.Drawing.Point p in moves)
             {
                 movementIndicators[p.X, p.Y].Visibility = Visibility.Visible;
@@ -193,18 +204,23 @@ namespace Chess_AI
             {
                 if (AlgorithmList.SelectedItem.ToString() == "Brute Force")
                 {
-                    algorithm = new BruteForce(new Board(FenList.SelectedItem.ToString()));
+                    algorithm = new BruteForce();
                 }
                 else if (AlgorithmList.SelectedItem.ToString() == "MiniMax")
                 {
-                    algorithm = new MiniMax(new Board(FenList.SelectedItem.ToString()));
+                    algorithm = new MiniMax();
+                }
+                else if (AlgorithmList.SelectedItem.ToString() == "Alpha-Beta Pruning")
+                {
+                    algorithm = new AlphaBeta();
                 }
 
-                int c = algorithm.Analyze(Convert.ToInt32(DepthTextBox.Text));
-                MessageBox.Show(c.ToString() + " moves found with depth = " + DepthTextBox.Text);
+                int c = algorithm.Analyze(board, Convert.ToInt32(DepthTextBox.Text));
+                numMovesLabel.Content = "Moves: " + c.ToString();
+                bestMoveLabel.Content = "Best move: " + algorithm.BestMove().ToString();
 
                 // A modo de reset para que el diccionario se vacíe
-                board = new Board(FenList.SelectedItem.ToString());
+                //board = new Board(FenList.SelectedItem.ToString());
             }
             catch (Exception ex) 
             {

@@ -13,11 +13,10 @@ namespace Chess_AI.Models
         private int id = 10;
         public override int Id { get { return id; } set { id = value; } }
         private Models.Color _color;
-        public bool HasJumped { get; set; }
         public int turnJumped = 0;
-        public Pawn(int x, int y, Models.Color color) : base(x, y, color)
+        public Pawn(int x, int y, Models.Color color, int turnJumped = 0) : base(x, y, color)
         {
-            HasJumped = false;
+            this.turnJumped = turnJumped;
         }
 
         public override Color Color
@@ -66,36 +65,31 @@ namespace Chess_AI.Models
                     validMoves.Add(new Point(X + 1, Y + 1));
             }
 
-            if (this.Color == Models.Color.Black && this.X == 4 ||
-                this.Color == Models.Color.White && this.X == 3)
-                validMoves.AddRange(GetEnPassantMoves(board));
-
             return validMoves;
         }
-        public List<Point> GetEnPassantMoves(Piece[,] board)
+        public List<Point> GetEnPassantMoves(Piece[,] board, int turn, int jumpTurn)
         {
             List<Point> EnPassantMoves = new List<Point>();
-            if (Board.GetTurn() != Board.GetJumpTurn() + 1) return EnPassantMoves;
 
             if (X + 1 < 8 && Y - 1 >= 0 && board[X, Y - 1] is Pawn && this.Color == Models.Color.Black && board[X, Y - 1].Color != this.Color)
             {
                 Pawn p = (Pawn) board[X, Y - 1];
-                if (p.turnJumped == Board.GetJumpTurn()) EnPassantMoves.Add(new Point(X + 1, Y - 1));
+                if (p.turnJumped == jumpTurn) EnPassantMoves.Add(new Point(X + 1, Y - 1));
             }
             if (X + 1 < 8 && Y + 1 < 8 && board[X, Y + 1] is Pawn && this.Color == Models.Color.Black && board[X, Y + 1].Color != this.Color)
             {
                 Pawn p = (Pawn)board[X, Y + 1];
-                if (p.turnJumped == Board.GetTurn() - 1) EnPassantMoves.Add(new Point(X + 1, Y + 1));
+                if (p.turnJumped == turn - 1) EnPassantMoves.Add(new Point(X + 1, Y + 1));
             }
             if (X - 1 >= 0 && Y - 1 >= 0 && board[X, Y - 1] is Pawn && this.Color == Models.Color.White && board[X, Y - 1].Color != this.Color)
             {
                 Pawn p = (Pawn)board[X, Y - 1];
-                if (p.turnJumped == Board.GetTurn() - 1) EnPassantMoves.Add(new Point(X - 1, Y - 1));
+                if (p.turnJumped == turn - 1) EnPassantMoves.Add(new Point(X - 1, Y - 1));
             }
             if (X - 1 >= 0 && Y + 1 < 8 && board[X, Y + 1] is Pawn && this.Color == Models.Color.White && board[X, Y + 1].Color != this.Color)
             {
                 Pawn p = (Pawn)board[X, Y + 1];
-                if (p.turnJumped == Board.GetTurn() - 1) EnPassantMoves.Add(new Point(X - 1, Y + 1));
+                if (p.turnJumped == turn - 1) EnPassantMoves.Add(new Point(X - 1, Y + 1));
             }
 
             return EnPassantMoves;
@@ -103,7 +97,6 @@ namespace Chess_AI.Models
         public override Piece DeepClone()
         {
             Pawn p = (Pawn)this.MemberwiseClone();
-            p.HasJumped = this.HasJumped;
             return p;
         }
     }

@@ -15,9 +15,9 @@ namespace Chess_AI.Models
         private Models.Color _color;
         public bool HasMoved { get; set; }
 
-        public Rook(int x, int y, Models.Color color) : base(x, y, color)
+        public Rook(int x, int y, Models.Color color, bool hasMoved = false) : base(x, y, color)
         {
-            HasMoved = false;
+            this.HasMoved = hasMoved;
         }
 
         public override Color Color

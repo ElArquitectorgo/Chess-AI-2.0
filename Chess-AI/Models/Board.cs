@@ -10,8 +10,8 @@ namespace Chess_AI.Models
     {
         private Piece[,] board = new Piece[8, 8];
         private static string standartdFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-        public static int turn = 0;
-        public static int jumpTurn = 0;
+        public int turn { get; set; }
+        public int jumpTurn { get; set; }
 
         public Board()
         {
@@ -21,6 +21,44 @@ namespace Chess_AI.Models
         public Board(String fen)
         {
             ReadFen(fen);
+        }
+
+        public Board(Piece[,] pieces, int turn, int jumpTurn)
+        {
+            this.turn = turn;
+            this.jumpTurn = jumpTurn;
+
+            foreach (Piece piece in pieces)
+            {
+                if (piece == null) continue;
+                else if (piece is Pawn) 
+                {
+                    Pawn p = (Pawn) piece;
+                    board[p.X, p.Y] = new Pawn(p.X, p.Y, p.Color, p.turnJumped);
+                }
+                else if (piece is Rook)
+                {
+                    Rook r = (Rook) piece;
+                    board[r.X, r.Y] = new Rook(r.X, r.Y, r.Color, r.HasMoved);
+                }
+                else if (piece is Knight)
+                {
+                    board[piece.X, piece.Y] = new Knight(piece.X, piece.Y, piece.Color);
+                }
+                else if (piece is Bishop)
+                {
+                    board[piece.X, piece.Y] = new Bishop(piece.X, piece.Y, piece.Color);
+                }
+                else if (piece is Queen)
+                {
+                    board[piece.X, piece.Y] = new Queen(piece.X, piece.Y, piece.Color);
+                }
+                else if (piece is King)
+                {
+                    King k = (King) piece;
+                    board[k.X, k.Y] = new King(k.X, k.Y, k.Color, k.CanCastle);
+                }
+            }
         }
 
         public void Move(int x1, int y1, int x2, int y2)
@@ -54,7 +92,6 @@ namespace Chess_AI.Models
                         p is Pawn && p.Color == Models.Color.Black && x1 == 1 && x2 == 3)
             {
                 Pawn pawn = (Pawn)p;
-                pawn.HasJumped = true;
                 jumpTurn = turn - 1;
                 board[x2, y2] = pawn;
                 pawn.turnJumped = jumpTurn;
@@ -193,24 +230,9 @@ namespace Chess_AI.Models
             this.board = board;
         }
 
-        public static int GetTurn()
-        {
-            return turn;
-        }
-
         public void SubstractTurn()
         {
             turn--;
-        }
-
-        public static int GetJumpTurn()
-        {
-            return jumpTurn;
-        }
-        
-        public void SetJumpTurn(int n)
-        {
-            jumpTurn = n;
         }
 
         public Piece GetPiece(int row, int col)
@@ -232,12 +254,6 @@ namespace Chess_AI.Models
                 sb.Append("]\n");
             }
             return sb.ToString();
-        }
-
-        public Board DeepClone()
-        {
-            Board b = (Board) this.MemberwiseClone();
-            return b;
         }
     }
 }

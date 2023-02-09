@@ -11,17 +11,16 @@ namespace Chess_AI.AI
 {
     public class BruteForce: IAlgorithm
     {
-        private Board board;
         private Models.Color Color = Models.Color.White;
-        public BruteForce(Board board) 
+        public BruteForce() 
         {
-            this.board = board;
         }
 
         // 17 fen1 depth 5
         // 16 fen6 depth 4
-        public int Analyze(int depth)
+        public int Analyze(Board board, int depth)
         {
+            //return Analyze2(board, depth);
             if (depth == 0) return 1;
 
             int numPositions = 0;
@@ -31,6 +30,16 @@ namespace Chess_AI.AI
                 int initPosX = piece.X; int initPosY = piece.Y;
 
                 List<Point> moves = piece.GetValidMoves(board.GetBoard());
+                if (piece is Pawn && piece.Color == Models.Color.Black && initPosX == 4 ||
+                    piece is Pawn && piece.Color == Models.Color.White && initPosX == 3)
+                {
+                    Pawn p = (Pawn)piece;
+                    if (board.turn == board.jumpTurn + 1)
+                    {
+                        moves.AddRange(p.GetEnPassantMoves(board.GetBoard(), board.turn, board.jumpTurn));
+                        moves = piece.FilterMoves(board.GetBoard(), moves);
+                    }  
+                }
                 foreach (Point p in moves)
                 {
                     Piece p2 = null;
@@ -74,14 +83,14 @@ namespace Chess_AI.AI
                         canCastle = king.CanCastle;
                     }
 
-                    int BoardJumpTurn = Board.GetJumpTurn();
+                    int BoardJumpTurn = board.jumpTurn;
                     board.Move(initPosX, initPosY, p.X, p.Y);
                     ChangeColor();
 
-                    numPositions += Analyze(depth - 1);
+                    numPositions += Analyze(board, depth - 1);
 
                     piece.Move(initPosX, initPosY);
-                    board.SetJumpTurn(BoardJumpTurn);
+                    board.jumpTurn = BoardJumpTurn;
 
                     if (!hadMoved) rook.HasMoved = false;
                     if (pawn != null)
@@ -140,7 +149,51 @@ namespace Chess_AI.AI
             return numPositions;
         }
 
+        // 25 fen 6 depth 4
+        private int Analyze2(Board board, int depth)
+        {
+            if (depth == 0) return 1;
 
+            int numPositions = 0;
+            foreach (Piece piece in board.GetBoard())
+            {
+                if (piece == null || piece.Color != this.Color || !piece.IsAlive) continue;
+                int initPosX = piece.X; int initPosY = piece.Y;
+
+                List<Point> moves = piece.GetValidMoves(board.GetBoard());
+                if (piece is Pawn && piece.Color == Models.Color.Black && initPosX == 4 ||
+                    piece is Pawn && piece.Color == Models.Color.White && initPosX == 3)
+                {
+                    Pawn p = (Pawn)piece;
+                    if (board.turn == board.jumpTurn + 1)
+                    {
+                        moves.AddRange(p.GetEnPassantMoves(board.GetBoard(), board.turn, board.jumpTurn));
+                        moves = piece.FilterMoves(board.GetBoard(), moves);
+                    }
+                }
+                foreach (Point p in moves)
+                {
+                    Board next = new Board(board.GetBoard(), board.turn, board.jumpTurn);
+                    next.Move(initPosX, initPosY, p.X, p.Y);
+                    ChangeColor();
+
+                    numPositions += Analyze2(next, depth - 1);
+
+                    piece.Move(initPosX, initPosY);
+
+                    next.SubstractTurn();
+
+                    ChangeColor();
+                }
+            }
+
+            return numPositions;
+        }
+
+        public (Point, string) BestMove()
+        {
+            throw new NotImplementedException();
+        }
 
         private void ChangeColor()
         {

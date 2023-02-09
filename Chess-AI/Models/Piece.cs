@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 
 namespace Chess_AI.Models
 {
@@ -38,6 +39,64 @@ namespace Chess_AI.Models
         public List<Point> GetValidMoves(Piece[,] board)
         {
             List<Point> validMoves = GetPseudoValidMoves(board);
+            Point initPos = new Point(X, Y);
+
+            List<Point> validMovesCopy = new List<Point>(validMoves);
+            foreach (Point p in validMovesCopy)
+            {
+                Piece p2 = null;
+                Piece EnPassantPawn = null;
+                if (board[p.X, p.Y] != null)
+                    p2 = board[p.X, p.Y].DeepClone();
+
+                if (this is Pawn & initPos.Y != p.Y && board[p.X, p.Y] == null)
+                {
+                    if (p.X == 2 && board[p.X + 1, p.Y] is Pawn && board[p.X + 1, p.Y].Color != this.Color)
+                    {
+                        EnPassantPawn = board[p.X + 1, p.Y].DeepClone();
+                        board[p.X + 1, p.Y] = null;
+                    }
+                    else if (p.X == 5 && board[p.X - 1, p.Y] is Pawn && board[p.X - 1, p.Y].Color != this.Color)
+                    {
+                        EnPassantPawn = board[p.X - 1, p.Y].DeepClone();
+                        board[p.X - 1, p.Y] = null;
+                    }
+                }
+
+                board[initPos.X, initPos.Y] = null;
+                board[p.X, p.Y] = this;
+                this.Move(p.X, p.Y);
+
+                foreach (Piece piece in board)
+                {
+                    if (piece == null || piece.Color == this.Color) continue;
+                    List<Point> enemyValidMoves = piece.GetPseudoValidMoves(board);
+                    for (int i = 0; i < enemyValidMoves.Count; i++)
+                    {
+                        if (board[enemyValidMoves[i].X, enemyValidMoves[i].Y] is King)
+                        {
+                            validMoves.Remove(p);
+                            break;
+                        }
+                    }
+                }
+
+                board[initPos.X, initPos.Y] = this;
+                this.Move(initPos.X, initPos.Y);
+
+                board[p.X, p.Y] = p2;
+                if (EnPassantPawn != null) board[EnPassantPawn.X, EnPassantPawn.Y] = EnPassantPawn;
+
+                // En principio no debería tener en cuenta el enroque del rey ya que en su propia clase
+                // se comprueba si estaría siendo atacado o no
+            }
+
+            return validMoves;
+        }
+
+        public List<Point> FilterMoves(Piece[,] board, List<Point> moves)
+        {
+            List<Point> validMoves = moves;
             Point initPos = new Point(X, Y);
 
             List<Point> validMovesCopy = new List<Point>(validMoves);
