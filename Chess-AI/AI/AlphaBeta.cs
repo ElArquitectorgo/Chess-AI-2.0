@@ -14,6 +14,7 @@ namespace Chess_AI.AI
     {
         private Models.Color Color = Models.Color.White;
         private (Point, string) bestMove = (new Point(-9, -9), "");
+        private int bestEvaluation = int.MinValue;
         private static readonly ParallelOptions ParallelOptions = new()
         {
             MaxDegreeOfParallelism = 8
@@ -24,13 +25,14 @@ namespace Chess_AI.AI
 
         public int Analyze(Board board, int depth)
         {
-            int bestEvaluation = int.MinValue;
+            //int bestEvaluation = int.MinValue;
             Piece[] pieces = new Piece[64];
             int cnt = 0;
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
+                    if (board.GetPiece(i, j) == null) continue;
                     pieces[cnt] = board.GetPiece(i, j);
                     cnt++;
                 }
@@ -101,10 +103,6 @@ namespace Chess_AI.AI
                             moves = piece.FilterMoves(board.GetBoard(), moves);
                         }
                     }
-                    if (moves.Count == 0)
-                    {
-                        // Satus.IsCheck(board.GetBoard(), Color)
-                    }
 
                     foreach (Point p in moves)
                     {
@@ -141,10 +139,6 @@ namespace Chess_AI.AI
                             moves.AddRange(p.GetEnPassantMoves(board.GetBoard(), board.turn, board.jumpTurn));
                             moves = piece.FilterMoves(board.GetBoard(), moves);
                         }
-                    }
-                    if (moves.Count == 0)
-                    {
-                        // Satus.IsCheck(board.GetBoard(), Color)
                     }
 
                     foreach (Point p in moves)

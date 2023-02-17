@@ -30,12 +30,6 @@ namespace Chess_AI.Models
             this.Y = y;
         }
         public abstract List<Point> GetPseudoValidMoves(Piece[,] board);
-        /// <summary>
-        /// La variable targetPiece solo es necesaria para que funcione la IA,
-        /// para jugar yo manualmente no me haría falta.
-        /// </summary>
-        /// <param name="board"></param>
-        /// <returns></returns>
         public List<Point> GetValidMoves(Piece[,] board)
         {
             List<Point> validMoves = GetPseudoValidMoves(board);

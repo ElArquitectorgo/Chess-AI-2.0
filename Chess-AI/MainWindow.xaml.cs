@@ -221,6 +221,9 @@ namespace Chess_AI
 
                 // A modo de reset para que el diccionario se vacíe
                 //board = new Board(FenList.SelectedItem.ToString());
+
+                ResetImages();
+                Draw();
             }
             catch (Exception ex) 
             {

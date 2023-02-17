@@ -85,10 +85,6 @@ namespace Chess_AI.AI
                             moves = piece.FilterMoves(board.GetBoard(), moves);
                         }
                     }
-                    if (moves.Count == 0)
-                    {
-                        // Satus.IsCheck(board.GetBoard(), Color)
-                    }
 
                     foreach (Point p in moves)
                     {
@@ -125,10 +121,6 @@ namespace Chess_AI.AI
                             moves.AddRange(p.GetEnPassantMoves(board.GetBoard(), board.turn, board.jumpTurn));
                             moves = piece.FilterMoves(board.GetBoard(), moves);
                         }
-                    }
-                    if (moves.Count == 0)
-                    {
-                        // Satus.IsCheck(board.GetBoard(), Color)
                     }
 
                     foreach (Point p in moves)
